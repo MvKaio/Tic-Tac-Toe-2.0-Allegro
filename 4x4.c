@@ -9,10 +9,6 @@
 #define GREEN al_map_rgb(0,255,0)
 #define BLUE al_map_rgb(40,0,255)
 
-volatile bool Close = 0;
-void Handler(){
-	Close = 1;
-}
 
 // Declaring the fieldState matrix and the booleans to store player's move & stage of the game:
 int M[4][4] = {0};
@@ -62,57 +58,54 @@ int main(){
 
 	al_flip_display();
 
-	LOCK_FUNCTION (Handler);
-	set_close_button_callback (Handler);
+	while(!END){
+		// Exchange the atual player:
+		player = !player;
 
-	while (!Close){
-		while(!END){
-			// Exchange the atual player:
-			player = !player;
-
-			// Wait for the player to move:
-			int click = 0;
-			while(click == 0){
-				al_get_mouse_state(&mouseState);
-				if(mouseState.buttons == 1){
-					al_rest(0.1);
-					if((click = validMove(mouseState.x, mouseState.y))){
-						break;
-					}
-					if(click) break;
+		// Wait for the player to move:
+		int click = 0;
+		while(click == 0){
+			al_get_mouse_state(&mouseState);
+			if(mouseState.buttons == 1){
+				al_rest(0.1);
+				if((click = validMove(mouseState.x, mouseState.y))){
+					break;
 				}
+				if(click) break;
 			}
-
-			// Render the atual stage:
-
-			BasicGrid(edosz40,grid);
-			DrawBoard(edosz80);
-			al_flip_display();
-			
-
-			// Check if the game ended:
-			END = endGame();
 		}
 
+		// Render the atual stage:
 		BasicGrid(edosz40,grid);
-
-		// Tell who won:
-		if(END == 2){
-			al_draw_textf(edosz40, BLUE, 300, 40, ALLEGRO_ALIGN_CENTER, "It's a draw!");
-		}
-		else{
-			if(player){
-				al_draw_textf(edosz40, GREEN, 300, 40, ALLEGRO_ALIGN_CENTER, "Player 1 wins!");
-			}
-			else{
-				al_draw_textf(edosz40, RED, 300, 40, ALLEGRO_ALIGN_CENTER, "Player 2 wins!");
-			}
-		}
-
-		// Keep the grid there:
 		DrawBoard(edosz80);
 		al_flip_display();
+		
+
+		// Check if the game ended:
+		END = endGame();
 	}
+
+	BasicGrid(edosz40,grid);
+
+	// Tell who won:
+	if(END == 2){
+		al_draw_textf(edosz40, BLUE, 300, 40, ALLEGRO_ALIGN_CENTER, "It's a draw!");
+	}
+	else{
+		if(player){
+			al_draw_textf(edosz40, GREEN, 300, 40, ALLEGRO_ALIGN_CENTER, "Player 1 wins!");
+		}
+		else{
+			al_draw_textf(edosz40, RED, 300, 40, ALLEGRO_ALIGN_CENTER, "Player 2 wins!");
+		}
+	}
+
+	// Keep the grid there:
+	DrawBoard(edosz80);
+	al_flip_display();
+
+  al_rest(5.0);
+
 	// Uninstall resources:
 	Finish();
 	al_destroy_font(edosz40);
@@ -282,11 +275,11 @@ void DrawBoard(const ALLEGRO_FONT *font){
 		for(int j = 0; j < 4; j++){
 			if(M[i][j]){
 				if(M[i][j] == 1) 
-					// al_draw_textf(font, GREEN, (Fields[i*4 + j].x0 + Fields[i*4 + j].x1)/2, Fields[i*4 + j].y0 + 15, ALLEGRO_ALIGN_CENTER, "o");
-					al_draw_filled_rectangle(Fields[i*4 + j].x0, Fields[i*4 + j].y0, Fields[i*4 + j].x1, Fields[i*4 + j].y1, GREEN);
+					al_draw_textf(font, GREEN, (Fields[i*4 + j].x0 + Fields[i*4 + j].x1)/2, Fields[i*4 + j].y0 + 15, ALLEGRO_ALIGN_CENTER, "o");
+					// al_draw_filled_rectangle(Fields[i*4 + j].x0, Fields[i*4 + j].y0, Fields[i*4 + j].x1, Fields[i*4 + j].y1, GREEN);
 				else 
-					// al_draw_textf(font, RED, (Fields[i*4 + j].x0 + Fields[i*4 + j].x1)/2, Fields[i*4 + j].y0 + 15, ALLEGRO_ALIGN_CENTER, "x");
-					al_draw_filled_rectangle(Fields[i*4 + j].x0, Fields[i*4 + j].y0, Fields[i*4 + j].x1, Fields[i*4 + j].y1, GREEN);
+					al_draw_textf(font, RED, (Fields[i*4 + j].x0 + Fields[i*4 + j].x1)/2, Fields[i*4 + j].y0 + 15, ALLEGRO_ALIGN_CENTER, "x");
+					// al_draw_filled_rectangle(Fields[i*4 + j].x0, Fields[i*4 + j].y0, Fields[i*4 + j].x1, Fields[i*4 + j].y1, GREEN);
 			}
 		}
 }
